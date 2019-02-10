@@ -1,0 +1,12 @@
+dockerbuilddir = .
+
+rule dockerbuild
+  command = docker build --progress=plain --iidfile $out -f $in $dockerbuilddir
+  pool = console
+
+rule dockerunpack
+  command = mkdir -p $out && docker save $$(cat $in) | tar -vx --wildcards '*.tar' --to-command="tar -C $out -vx"
+  pool = console
+
+build gen/.dockerimageid: dockerbuild ./Dockerfile
+build gen: dockerunpack gen/.dockerimageid
